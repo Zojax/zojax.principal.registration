@@ -1,0 +1,7 @@
+<div>
+  <h2 tal:content="view/label"></h2>
+  <div class="z-page-description" tal:content="view/description"></div>
+
+  <tal:block define="context view/configlet"
+	     content="structure provider:content.container.contents" />
+</div>

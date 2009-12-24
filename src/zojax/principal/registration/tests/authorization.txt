@@ -1,0 +1,393 @@
+=============
+Authorization
+=============
+
+  >>> from zope import component, interface, event
+  >>> from zope.testbrowser.testing import Browser
+  >>> from zope.app.testing.functional import getRootFolder
+  >>> from zope.app.component.hooks import setSite
+  >>> from zope.dublincore.interfaces import ICMFDublinCore
+  >>> from zope.app.security.interfaces import IAuthentication
+  >>> from zope.app.authentication.principalfolder import Principal
+  >>> from zope.app.authentication.principalfolder import PrincipalInfo
+  >>> from zope.app.authentication.principalfolder import PrincipalFolder
+  >>> from zope.app.authentication.interfaces import IAuthenticatorPlugin
+  >>> from zojax.authentication.interfaces import IAuthenticationConfiglet
+  >>> from zojax.principal.registration.interfaces import IPortalRegistration
+
+  >>> root = getRootFolder()
+  >>> ICMFDublinCore(root).title = u'Portal'
+  >>> setSite(root)
+  >>> sm = root.getSiteManager()
+
+  >>> configlet = sm.getUtility(IAuthenticationConfiglet)
+  >>> configlet.installUtility()
+  >>> configlet.installPrincipalRegistry()
+
+  >>> auth = sm.getUtility(IAuthentication)
+  >>> auth['users'] = PrincipalFolder()
+  >>> sm.registerUtility(auth['users'], IAuthenticatorPlugin, 'users')
+
+  >>> auth.authenticatorPlugins = ('users',)
+
+  >>> def authenticateCredentials(self, credentials):
+  ...     id = self._PrincipalFolder__id_by_login.get(credentials.login)
+  ...     if id is None:
+  ...         return None
+  ...     internal = self[id]
+  ...     if not internal.checkPassword(credentials.password):
+  ...         return None
+  ...     return PrincipalInfo(
+  ...         self.prefix + id, internal.login, internal.title,
+  ...         internal.description)
+
+  >>> oldAuthenticateCredentials = PrincipalFolder.authenticateCredentials
+
+  >>> PrincipalFolder.authenticateCredentials = authenticateCredentials
+
+
+we need mail address
+
+  >>> from zojax.mail.interfaces import IMailAddress
+
+  >>> class simpleMailAddress(object):
+  ...     interface.implements(IMailAddress)
+  ...     component.adapts(Principal)
+  ...     
+  ...     address = 'nkim@zojax.net'
+  ...     
+  ...     def __init__(self, principal):
+  ...         pass
+
+  >>> component.getGlobalSiteManager().registerAdapter(simpleMailAddress)
+
+
+  >>> emails = []
+  >>> def send(self, fromaddr, toaddr, message):
+  ...     emails.append((fromaddr, toaddr, message))
+  >>> def getEMails(clear=True):
+  ...     global emails
+  ...     m = list(emails)
+  ...     if clear:
+  ...         emails = []
+  ...     return m
+
+  >>> from zope.sendmail.mailer import SMTPMailer
+  >>> oldSend = SMTPMailer.send
+  >>> SMTPMailer.send = send
+
+
+setup config to use authorization
+
+  >>> manager = Browser()
+  >>> manager.handleErrors = False
+  >>> manager.addHeader("Authorization", "Basic mgr:mgrpw")
+  >>> manager.open("http://localhost/settings/")
+  >>> manager.getLink('Portal registration').click()
+
+  >>> manager.getControl(name="configlet.widgets.public:list").value = ['false']
+  >>> manager.getControl(name="configlet.widgets.authorization:list").value = ['true']
+  >>> manager.getControl('Save').click()
+
+  >>> manager.open('http://localhost/settings/principals/registration/?configlet.widgets.actions:list=testing-action1&configlet.buttons.save=Save&configlet.widgets.authorization:list=true')
+
+  >>> actor = Browser()
+  >>> actor.handleErrors = False
+  >>> actor.open("http://localhost/test.html")
+  >>> actor.getLink('Join portal').click()
+
+  >>> actor.getControl('User Id').value = u'nikolay'
+  >>> actor.getControl('User Title').value = u'Nikolay'
+  >>> actor.getControl('Register').click()
+
+  >>> print actor.contents
+  <!DOCTYPE...
+  ...
+  <div id="z-authentication"><h1>Registration completed</h1><div class="registration-confirm-text">
+      Congratulations, your registeration is complete.  We need to confirm your email address. Please check your inbox for a verification email and click on the link in it.
+  </div></div>
+  ...
+  </html>
+
+  >>> print actor.url
+  http://localhost/mailconfirm.html
+
+  >>> emails[-1][1][0]
+  u'Nikolay <nkim@zojax.net>'
+
+  >>> from email import message_from_string, quopriMIME
+
+  >>> message = message_from_string(emails[-1][2])
+
+  >>> message['subject']
+  'Portal: registration confirmation'
+
+  >>> msg = message.get_payload(decode=1)
+  >>> print msg
+  Dear Nikolay
+  Thank you for registering with Portal.
+  You have to activate the account.
+  Activation code: ...
+  You can activate your account by visiting following link:
+  http://localhost/authorizeprincipal.html/.../
+  --
+  Best Regards,
+  Portal
+
+
+Authorization configlet
+-----------------------
+
+  >>> manager.open("http://localhost/settings/")
+  >>> manager.getLink('Portal registration').click()
+  >>> manager.getLink('Authorization').click()
+
+  >>> print manager.contents
+  <html>
+  ...
+  <table class="z-table">
+    <thead>
+      <tr>
+        <th></th>
+        <th>Principal</th>
+        <th>Authorization code</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="odd">
+        <td><input type="checkbox" name="authcodes:list" value="..." /></td>
+        <td>Nikolay</td>
+        <td>...</td>
+      </tr>
+    </tbody>
+  </table>
+  ...
+  </html>
+
+  >>> emails = []
+
+  >>> regtool = sm.getUtility(IPortalRegistration)
+  >>> authcode = list(regtool.listAuthorizations())[0][1]
+
+  >>> manager.getControl(name="authcodes:list").value = [authcode]
+  >>> manager.getControl(name="form.button.resend").click()
+
+  >>> 'Authorization information has been sent.' in manager.contents
+  True
+
+  >>> message = message_from_string(emails[-1][2])
+  >>> msg = message.get_payload(decode=1)
+  >>> print msg
+  Dear Nikolay
+  Thank you for registering with Portal.
+  You have to activate the account.
+  Activation code: ...
+  You can activate your account by visiting following link:
+  http://localhost/authorizeprincipal.html/.../
+  --
+  Best Regards,
+  Portal
+
+  >>> emails = []
+
+  >>> actor.open("http://localhost/login.html")
+  >>> actor.getControl('Login Name').value = 'nikolay'
+  >>> actor.getControl('Password').value = '12345'
+  >>> actor.getControl('Log in').click()
+
+  >>> print actor.contents
+  <!DOCTYPE...
+  ...
+  ...Your account is not authorized....
+  ...
+  </html>
+
+  >>> from StringIO import StringIO
+  >>> s = StringIO()
+  >>> print >> s, msg
+  >>> msg = s.getvalue()
+
+  >>> url = msg.split()[-5]
+  >>> actor.open(url)
+
+  >>> actor.open("http://localhost/login.html")
+  >>> actor.getControl('Login Name').value = 'nikolay'
+  >>> actor.getControl('Password').value = '12345'
+  >>> actor.getControl('Log in').click()
+
+  >>> print actor.contents
+  <html>
+  ...
+  ...You successfully logged in...
+  ...
+  </html>
+
+
+  >>> actor.open("http://localhost/logout.html")
+
+
+user1
+  
+  >>> actor.open("http://localhost/test.html")
+  >>> actor.getLink('Join portal').click()
+
+  >>> actor.getControl('User Id').value = u'user1'
+  >>> actor.getControl('User Title').value = u'User1'
+  >>> actor.getControl('Register').click()
+
+  >>> actor.open("http://localhost/login.html")
+  >>> actor.getControl('Login Name').value = 'user1'
+  >>> actor.getControl('Password').value = '12345'
+  >>> actor.getControl('Log in').click()
+
+  >>> print actor.contents
+  <!DOCTYPE...
+  ...
+  ...Your account is not authorized....
+  ...
+  </html>
+
+
+  >>> manager.open("http://localhost/settings/")
+  >>> manager.getLink('Portal registration').click()
+  >>> manager.getLink('Authorization').click()
+
+  >>> manager.getControl(name="authcodes:list").value = [list(regtool.listAuthorizations())[0][1]]
+  >>> manager.getControl(name="form.button.authorize").click()
+
+  >>> 'Principals have been authorized' in manager.contents
+  True
+
+  >>> actor.open("http://localhost/login.html")
+  >>> actor.getControl('Login Name').value = 'user1'
+  >>> actor.getControl('Password').value = '12345'
+  >>> actor.getControl('Log in').click()
+
+  >>> print actor.contents
+  <html>
+  ...
+  ...You successfully logged in...
+  ...
+  </html>
+
+  >>> actor.open("http://localhost/logout.html")
+
+
+user2
+  
+  >>> actor.open("http://localhost/test.html")
+  >>> actor.getLink('Join portal').click()
+  >>> actor.getControl('User Id').value = u'user2'
+  >>> actor.getControl('User Title').value = u'User2'
+  >>> actor.getControl('Register').click()
+
+  >>> actor.open("http://localhost/authorizeprincipal.html/asdfasdfsdfasfdsad/")
+  >>> 'Authorization code is invalid.' in actor.contents
+  True
+
+  >>> actor.getControl('Authorize').click()
+  >>> 'Please fix indicated errors.' in actor.contents
+  True
+
+  >>> actor.getControl('Authorization code').value = 'sdfasf asdf asdf'
+  >>> actor.getControl('Authorize').click()
+  
+  >>> 'Authorization code is invalid.' in actor.contents
+  True
+
+  >>> actor.getControl('Authorization code').value = str(list(regtool.listAuthorizations())[0][1])
+  >>> actor.getControl('Authorize').click()
+
+  >>> actor.url
+  'http://localhost/login.html'
+
+  >>> 'Authorization completed.' in actor.contents
+  True
+
+  >>> actor.getControl('Login Name').value = 'user2'
+  >>> actor.getControl('Password').value = '12345'
+  >>> actor.getControl('Log in').click()
+
+  >>> print actor.contents
+  <html>
+  ...
+  ...You successfully logged in...
+  ...
+  </html>
+
+  >>> actor.open("http://localhost/logout.html")
+
+user3
+  
+  >>> actor.open("http://localhost/test.html")
+  >>> actor.getLink('Join portal').click()
+  >>> actor.getControl('User Id').value = u'user3'
+  >>> actor.getControl('User Title').value = u'User3'
+  >>> actor.getControl('Register').click()
+
+  >>> actor.open("http://localhost/authorizeprincipal.html")
+  >>> actor.getControl('Login').value = 'unknown'
+  >>> actor.getControl('Send').click()
+
+  >>> "Can't find user with this login." in actor.contents
+  True
+
+  >>> from zope.proxy import removeAllProxies
+  >>> from zojax.authentication.interfaces import IPrincipalByLogin
+  >>> class PrincipalByLogin(object):
+  ...     interface.implements(IPrincipalByLogin)
+  ...     
+  ...     def getPrincipalByLogin(self, login):
+  ...         auth = sm.getUtility(IAuthentication)
+  ...         
+  ...         plugin = auth.get('users')
+  ...         if plugin is not None:
+  ...             try:
+  ...                 id = removeAllProxies(plugin).getIdByLogin(login)
+  ...                 return auth.getPrincipal(auth.prefix + id)
+  ...             except:
+  ...                 pass
+
+  >>> util = PrincipalByLogin()
+
+  >>> component.getGlobalSiteManager().registerUtility(
+  ...     util, IPrincipalByLogin, name='users')
+
+  >>> emails = []
+
+  >>> actor.getControl('Login').value = ''
+  >>> actor.getControl('Send').click()
+  >>> 'Please fix indicated errors.' in actor.contents
+  True
+
+  >>> actor.getControl('Login').value = 'user3'
+  >>> actor.getControl('Send').click()
+
+  >>> 'Authorization has been sent.' in actor.contents
+  True
+
+  >>> message = message_from_string(emails[-1][2])
+  >>> msg = message.get_payload(decode=1)
+  >>> print msg
+  Dear User3
+  Thank you for registering with Portal.
+  You have to activate the account.
+  Activation code: ...
+  You can activate your account by visiting following link:
+  http://localhost/authorizeprincipal.html/.../
+  --
+  Best Regards,
+  Portal
+
+  >>> principal = auth.getPrincipal(list(regtool.listAuthorizations())[0][0])
+
+  >>> from zojax.authentication.interfaces import PrincipalRemovingEvent
+  >>> event.notify(PrincipalRemovingEvent(principal))
+
+  >>> list(regtool.listAuthorizations())
+  []
+
+cleanup
+
+  >>> PrincipalFolder.authenticateCredentials = oldAuthenticateCredentials
+  >>> setSite(None)

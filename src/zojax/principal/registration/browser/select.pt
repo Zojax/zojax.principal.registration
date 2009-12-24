@@ -1,0 +1,16 @@
+<div i18n:domain="zojax.principal.registration">
+  <h1 i18n:translate="">Portal registration</h1>
+  <br />
+
+  <div class="fieldset">
+    <h2 i18n:translate="">Please select membership type</h2>
+
+    <ul class="listing">
+      <li tal:repeat="action view/listActions">
+	<a tal:attributes="href string:${action/id}/"
+	   tal:content="action/title"></a>
+	<div class="desc"><tal:block tal:content="action/description"/> &nbsp;</div>
+      </li>
+    </ul>
+  </div>
+</div>

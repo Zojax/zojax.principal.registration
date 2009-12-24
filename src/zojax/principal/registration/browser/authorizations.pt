@@ -1,0 +1,35 @@
+<h2>Principal authorizations</h2>
+<br />
+
+<div class="z-table-container" tal:condition="view/principals">
+  <table class="z-table">
+    <thead>
+      <tr>
+	<th></th>
+	<th>Principal</th>
+	<th>Authorization code</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr tal:repeat="info view/principals"
+	  tal:attributes="class python:repeat['info'].even and 'odd'or'even'">
+	<td><input type="checkbox" name="authcodes:list"
+		   tal:attributes="value info/authcode" /></td>
+	<td tal:content="info/title"></td>
+	<td tal:content="info/authcode"></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <hr />
+  <input class="z-form-button"
+	 type="submit" name="form.button.authorize" value="Authorize" />
+  <input class="z-form-button"
+	 type="submit" name="form.button.resend" 
+	 value="Re-send authorization email" />
+</div>
+
+<div tal:condition="not:view/principals">
+  There are no unauthorized principals.
+  <br /><br />
+</div>

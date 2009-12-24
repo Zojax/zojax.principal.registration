@@ -1,0 +1,117 @@
+=========================
+Join item for personalbar
+=========================
+
+  >>> from zope import component
+  >>> from zope.testbrowser.testing import Browser
+  >>> from zope.app.testing.functional import getRootFolder
+  >>> from zope.app.intid import IntIds
+  >>> from zope.app.intid.interfaces import IIntIds
+
+  >>> root = getRootFolder()
+  >>> root['ids'] = IntIds()
+  >>> root.getSiteManager().registerUtility(root['ids'], IIntIds)
+  >>> ids = root['ids'].register(root)
+
+By default there is no join menuitem, because we should add registration
+action in RegistrationConfiglet
+
+  >>> actor = Browser()
+  >>> actor.handleErrors = False
+  >>> actor.open("http://localhost/test.html")
+  >>> print actor.contents
+  <html>
+  ...
+  <div class="z-personalbar">
+    <div class="z-personalbar-menu">
+       <ul>
+         <li class="z-personalbar-principal">
+          <span class="z-personalbar-principal-not-logged-in">Not logged in &#8212;</span>
+         </li>
+         <li><a href="loginAuth" title="Login to portal">Login</a>
+         </li>
+       </ul>
+    </div>
+  </div>
+  ...
+  </html>
+
+Let's check join form also
+
+  >>> actor.open("http://localhost/join.html")
+  Traceback (most recent call last):
+  ...
+  NotFound: ...
+
+Let's add registration action
+
+  >>> manager = Browser()
+  >>> manager.handleErrors = False
+  >>> manager.addHeader("Authorization", "Basic mgr:mgrpw")
+  >>> manager.open("http://localhost/settings/")
+  >>> manager.getLink('Portal registration').click()
+
+  >>> manager.open('http://localhost/settings/principals/registration/?configlet.widgets.actions:list=testing-action1&configlet.buttons.save=Save')
+
+Let's try again as anonymous
+
+  >>> actor.open("http://localhost/test.html")
+  >>> print actor.contents
+  <html>
+  ...
+  <div class="z-personalbar">
+    <div class="z-personalbar-menu">
+     <ul>
+       <li class="z-personalbar-principal">
+       <span class="z-personalbar-principal-not-logged-in">Not logged in &#8212;</span>
+       </li>
+       <li><a href="loginAuth" title="Login to portal">Login</a>
+       </li>
+       <li><a href="http://localhost/join.html">Join portal</a>...
+     </ul>
+  </div>
+  ...
+  </html>
+
+  >>> actor.getLink('Join portal').click()
+  >>> actor.url
+  'http://localhost/join.html'
+
+  >>> actor.getControl(name='form.widgets.id').value = u'bob'
+  >>> actor.getControl(name='form.widgets.title').value = u'Bob'
+  >>> actor.getControl(name='form.buttons.register').click()
+
+Now set 2 registration actions at the same time
+
+  >>> manager.open('http://localhost/settings/principals/registration/?configlet.widgets.actions:list=testing-action1&configlet.widgets.actions:list=testing-action2&configlet.buttons.save=Save')
+
+
+  >>> actor.open("http://localhost/join.html")
+  >>> print actor.contents
+  <!DOCTYPE html ...
+  ...
+  <div class="fieldset">
+    <h2>Please select membership type</h2>
+    <ul class="listing">
+      <li>
+        <a href="testing-action1/">Testing registration 1</a>
+        <div class="desc">First registration method. &nbsp;</div>
+      </li>
+      <li>
+        <a href="testing-action2/">Testing registration 2</a>
+        <div class="desc">Second registration method. &nbsp;</div>
+      </li>
+    </ul>
+  </div>
+  ...
+  </html>
+
+  >>> actor.open('http://localhost/join.html/testing-action1/')
+  >>> actor.open("http://localhost/join.html/testing-action2/")
+
+test
+
+  >>> actor.open("http://localhost/join.html/testing-action10/")
+  Traceback (most recent call last):
+  ...
+  NotFound: ...

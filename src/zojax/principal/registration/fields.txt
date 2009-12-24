@@ -1,0 +1,115 @@
+============
+Login fields
+============
+
+Setup. We should create IPrincipalByLogin utility first.
+Simple utility, just for testing:
+
+    >>> from zope import interface, component
+    >>> from zope.app.authentication.principalfolder import Principal
+    >>> from zojax.authentication.interfaces import IPrincipalByLogin
+
+    >>> class PrincipalByLogin(object):
+    ...     interface.implements(IPrincipalByLogin)
+    ...     
+    ...     logins = {'login1': ('user1', 'User1'),
+    ...               'login2': ('user2', 'User3'),
+    ...               'login3': ('user3', 'User4')}
+    ...     
+    ...     def getPrincipalByLogin(self, login):
+    ...         if login in self.logins:
+    ...             id, title = self.logins[login]
+    ...             return Principal(id, title)
+
+    >>> component.provideUtility(PrincipalByLogin(), name='testing')
+
+    >>> class MyPrincipal(object):
+    ...     pass
+
+
+LoginField
+----------
+
+LoginField checks if login name is valid and is not used in system by
+different principal.
+
+    >>> from zojax.principal.registration import fields
+
+    >>> field = fields.LoginField(__name__='login', title = u'Login')
+
+
+If we doesnt bind field to context, it won't check login.
+
+    >>> field.validate(u'login1')
+
+Let's bind field
+
+    >>> boundField = field.bind(object())
+
+Valid login
+
+    >>> boundField.validate(u'login10')
+
+Already used login
+
+    >>> boundField.validate(u'login1')
+    Traceback (most recent call last):
+    ...
+    LoginAlreadyInUse
+
+If login is not changed, validation should pass
+
+    >>> principal = MyPrincipal()
+    >>> principal.login = u'login1'
+
+    >>> boundField = field.bind(principal)
+    >>> boundField.validate(u'login1')
+
+LoginField use lower case for login value
+
+    >>> boundField.set(principal, u'LOGIN50')
+    >>> principal.login
+    u'login50'
+
+
+NewLoginField
+-------------
+
+NewLoginField always check login, even if field is bound.
+
+    >>> field = fields.NewLoginField(__name__='login', title = u'Login')
+
+    >>> field.validate(u'login1')
+    Traceback (most recent call last):
+    ...
+    LoginAlreadyInUse
+
+Bind field
+
+    >>> boundField = field.bind(object())
+
+Valid login
+
+    >>> boundField.validate(u'login10')
+
+Already used login
+
+    >>> boundField.validate(u'login1')
+    Traceback (most recent call last):
+    ...
+    LoginAlreadyInUse
+
+If context has login
+
+    >>> principal = MyPrincipal()
+    >>> principal.login = u'login1'
+
+    >>> boundField = field.bind(principal)
+    >>> boundField.validate(u'login1')
+    Traceback (most recent call last):
+    ...
+    LoginAlreadyInUse
+
+
+EMailLoginField and NewEMailLoginField are same as LoginField and
+NewLoginField except they use email address as login.

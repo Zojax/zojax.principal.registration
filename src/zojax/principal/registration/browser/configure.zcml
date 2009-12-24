@@ -1,0 +1,101 @@
+<configure
+   xmlns="http://namespaces.zope.org/zope"
+   xmlns:zcml="http://namespaces.zope.org/zcml"
+   xmlns:zojax="http://namespaces.zope.org/zojax"
+   xmlns:browser="http://namespaces.zope.org/browser"
+   i18n_domain="zojax.principal.registration">
+
+  <!-- configlet -->
+  <zojax:pagelet
+     name="index.html"
+     for="..interfaces.IPortalRegistration"
+     class="zojax.controlpanel.browser.wizard.ConfigletEditWizard"
+     permission="zojax.Configure" />
+
+  <!-- registration action -->
+  <browser:defaultView
+     name="index.html"
+     for="..interfaces.IMemberRegistrationAction" />
+
+  <!-- portal join -->
+  <zojax:pagelet
+     name="join.html"
+     for="zope.app.component.interfaces.ISite"
+     class=".join.RegistrationForm"
+     layout="auth"
+     permission="zope.Public" />
+
+  <zojax:pagelet
+     name="select.html"
+     for=".interfaces.IRegistrationWorkspace"
+     template="select.pt"
+     class=".select.SelectRegistrationForm"
+     layout="auth"
+     permission="zope.Public" />
+
+  <!-- join personal bar item -->
+  <browser:viewlet
+     name="zojax.principal.registration"
+     template="joinmenuitem.pt"
+     manager="zojax.personal.bar.interfaces.IPersonalBar"
+     class=".joinmenuitem.JoinMenuItem"
+     permission="zope.Public"
+     zcml:condition="installed zojax.personal.bar" />
+
+  <subscriber
+     handler=".joinmenuitem.portalRegistrationChanged"
+     zcml:condition="installed zojax.personal.bar" />
+
+  <!-- invitation -->
+  <zojax:pagelet
+     type="form.subform"
+     name="invitationCode"
+     weight="999999"
+     for="* ..interfaces.IMemberRegistrationForm"
+     class=".invitation.InvitationForm" />
+
+  <adapter
+     factory=".invitation.InvitationFieldWidget" />
+
+  <adapter
+     factory=".invitation.InvitationValidator" />
+
+  <!-- authorization -->
+  <zojax:pagelet
+     name="authorizations"
+     type="wizard.step"
+     title="Authorizations"
+     for="..interfaces.IPortalRegistration
+	  zojax.controlpanel.browser.interfaces.IConfigletEditWizard"
+     template="authorizations.pt"
+     class=".authorizations.Authorizations"
+     weight="150" />
+
+  <zojax:pagelet
+     name="authorizeprincipal.html"
+     for="zope.app.component.interfaces.ISite"
+     class=".authorize.AuthorizePrincipal"
+     layout="auth"
+     permission="zope.Public" />
+
+  <zojax:pagelet
+     name="resend"
+     type="form.subform"
+     for="zope.app.component.interfaces.ISite .authorize.AuthorizePrincipal"
+     class=".authorize.ResendAuthorization"
+     permission="zope.Public" />
+
+  <zojax:mailtemplate
+     for="zope.security.interfaces.IPrincipal *"
+     template="authmail.pt"
+     provides="..interfaces.IMailAuthorizationTemplate"
+     class=".authmail.AuthorizationMailTemplate" />
+
+  <zojax:pagelet
+     name="mailconfirm.html"
+     for="zope.app.component.interfaces.ISite"
+     layout="auth"
+     template="confirm.pt"
+     permission="zope.Public" />
+
+</configure>

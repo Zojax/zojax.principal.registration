@@ -1,0 +1,15 @@
+Dear <tal:block content="context/title" />
+
+Thank you for registering with <tal:block content="view/portal" />.
+
+You have to activate the account.
+
+Activation code: <tal:block content="view/authcode" />
+
+You can activate your account by visiting following link:
+<tal:block tal:content="view/url" />
+
+--
+Best Regards,
+<tal:block content="view/portal" />
+
