@@ -1,0 +1,36 @@
+<configure
+   xmlns="http://namespaces.zope.org/zope"
+   xmlns:zojax="http://namespaces.zope.org/zojax">
+
+  <interface
+     name="DefaultSkin"
+     interface=".tests.IDefaultSkin"
+     type="zope.publisher.interfaces.browser.IBrowserSkinType" />
+
+  <zojax:pagelet
+     name="test.html"
+     for="*"
+     template="test.pt"
+     permission="zope.Public" />
+
+  <utility
+     name="testing-action1"
+     factory=".action.TestingAction1" />
+
+  <zojax:pagelet
+     name="index.html"
+     for=".action.TestingAction1"
+     class=".actionforms.TestingAction1Form"
+     permission="zope.Public" />
+
+  <utility
+     name="testing-action2"
+     factory=".action.TestingAction2" />
+
+  <zojax:pagelet
+     name="index.html"
+     for=".action.TestingAction2"
+     class=".actionforms.TestingAction2Form"
+     permission="zope.Public" />
+
+</configure>

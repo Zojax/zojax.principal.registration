@@ -1,0 +1,2 @@
+<a tal:attributes="href string:${view/manager/portal_url}/join.html"
+   i18n:domain="zojax.principal.registration" i18n:translate="">Join portal</a>
