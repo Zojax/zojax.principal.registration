@@ -11,6 +11,7 @@
      for="..interfaces.IPortalRegistration"
      class="zojax.controlpanel.browser.wizard.ConfigletEditWizard"
      permission="zojax.Configure" />
+     
 
   <!-- registration action -->
   <browser:defaultView
@@ -51,7 +52,7 @@
      type="form.subform"
      name="invitationCode"
      weight="999999"
-     for="* ..interfaces.IMemberRegistrationForm"
+     for="zope.interface.Interface ..interfaces.IMemberRegistrationForm"
      class=".invitation.InvitationForm" />
 
   <adapter
@@ -97,5 +98,19 @@
      layout="auth"
      template="confirm.pt"
      permission="zope.Public" />
+     
+  <!-- invitation -->
+  <zojax:pagelet
+     name="login"
+     type="form.subform"
+     weight="10"
+     for="zope.interface.Interface ..interfaces.IMemberRegistrationForm"
+     class=".login.LoginSubForm"
+     permission="zope.Public" />
+     
+  <zojax:pagelet
+     type="form"
+     for=".login.LoginSubForm"
+     template="login.pt" />
 
 </configure>
