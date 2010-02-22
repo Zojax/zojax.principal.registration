@@ -1,3 +1,5 @@
-<h2>or use one of external login services</h2>
-<tal:block tal:repeat="login context/logins"
-       tal:content="structure login/render" />
+<div class="external-logins">
+  <h2>or use one of external login services</h2>
+  <tal:block tal:repeat="login context/logins"
+         tal:content="structure login/render" />
+</div>

@@ -18,14 +18,14 @@ $Id$
 from zope.component import getUtility, queryUtility, queryMultiAdapter
 from zope.app.security.interfaces import IAuthentication
 
-from zojax.layoutform import Fields, PageletEditSubForm
+from zojax.layoutform import Fields, PageletForm
 from zojax.authentication.interfaces import ILoginService, ISuccessLoginAction
 #from zojax.authentication.browser.login import LoginForm
 
 from zojax.principal.registration.interfaces import _
 
 
-class LoginSubForm(PageletEditSubForm):
+class LoginSubForm(PageletForm):
 
     title = _(u'Login')
     
@@ -39,3 +39,6 @@ class LoginSubForm(PageletEditSubForm):
         if loginService is not None:
             self.logins = filter(lambda x: x.id != 'default.login', \
                                  loginService.challengingActions())
+            
+    def isAvailable(self):
+        return bool(self.logins)
