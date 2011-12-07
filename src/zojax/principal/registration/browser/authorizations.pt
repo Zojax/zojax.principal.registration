@@ -1,4 +1,4 @@
-<h2>Principal authorizations</h2>
+<h2 i18n:translate="">Principal authorizations</h2>
 <br />
 
 <div class="z-table-container" tal:condition="view/principals">
@@ -6,8 +6,8 @@
     <thead>
       <tr>
 	<th></th>
-	<th>Principal</th>
-	<th>Authorization code</th>
+	<th i18n:translate="">Principal</th>
+	<th i18n:translate="">Authorization code</th>
       </tr>
     </thead>
     <tbody>
@@ -22,9 +22,9 @@
   </table>
 
   <hr />
-  <input class="z-form-button"
+  <input class="z-form-button" i18n:attributes="value"
 	 type="submit" name="form.button.authorize" value="Authorize" />
-  <input class="z-form-button"
+  <input class="z-form-button" i18n:attributes="value"
 	 type="submit" name="form.button.resend" 
 	 value="Re-send authorization email" />
 </div>

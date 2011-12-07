@@ -1,5 +1,5 @@
-<h1>Registration completed</h1>
+<h1 i18n:translate="">Registration completed</h1>
 
-<div class="registration-confirm-text">
+<div class="registration-confirm-text" i18n:translate="">
   Congratulations, your registeration is complete.  We need to confirm your email address. Please check your inbox for a verification email and click on the link in it.
 </div>
