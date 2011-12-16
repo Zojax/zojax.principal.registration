@@ -1,0 +1,202 @@
+##############################################################################
+#
+# Copyright (c) 2003-2004 Zope Corporation and Contributors.
+# All Rights Reserved.
+#
+# This software is subject to the provisions of the Zope Public License,
+# Version 2.1 (ZPL).  A copy of the ZPL should accompany this distribution.
+# THIS SOFTWARE IS PROVIDED "AS IS" AND ANY AND ALL EXPRESS OR IMPLIED
+# WARRANTIES ARE DISCLAIMED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF TITLE, MERCHANTABILITY, AGAINST INFRINGEMENT, AND FITNESS
+# FOR A PARTICULAR PURPOSE.
+#
+##############################################################################
+msgid ""
+msgstr ""
+"Project-Id-Version: Development/Unknown\n"
+"POT-Creation-Date: Thu Dec  8 23:21:08 2011\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: Zope 3 Developers <zope3-dev@zope.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: zope/app/locales/extract.py\n"
+
+#: src/zojax/principal/registration/browser/authmail.pt:15
+msgid "Dear ${title} Thank you for registering with ${portal}. You have to activate the account. Activation code: ${authcode} You can activate your account by visiting following link: ${url} -- Best Regards, ${view_portal}"
+msgstr ""
+
+#: src/zojax/principal/registration/browser/authorizations.pt:1
+msgid "Principal authorizations"
+msgstr ""
+
+#: src/zojax/principal/registration/browser/authorizations.pt:27
+msgid "Re-send authorization email"
+msgstr ""
+
+#: src/zojax/principal/registration/browser/authorizations.pt:9
+msgid "Principal"
+msgstr ""
+
+#: src/zojax/principal/registration/browser/authorizations.py:33
+msgid "Authorizations"
+msgstr ""
+
+#: src/zojax/principal/registration/browser/authorizations.py:46
+msgid "Principals have been authorized."
+msgstr ""
+
+#: src/zojax/principal/registration/browser/authorizations.py:65
+msgid "Authorization information has been sent."
+msgstr ""
+
+#: src/zojax/principal/registration/browser/authorize.py:108
+msgid "Can't find user with this login."
+msgstr ""
+
+#: src/zojax/principal/registration/browser/authorize.py:122
+msgid "Authorization has been sent."
+msgstr ""
+
+#: src/zojax/principal/registration/browser/authorize.py:37
+#: src/zojax/principal/registration/browser/authorizations.pt:10
+msgid "Authorization code"
+msgstr ""
+
+#: src/zojax/principal/registration/browser/authorize.py:38
+msgid "Enter authorization code."
+msgstr ""
+
+#: src/zojax/principal/registration/browser/authorize.py:48
+#: src/zojax/principal/registration/interfaces.py:78
+msgid "Authorization"
+msgstr ""
+
+#: src/zojax/principal/registration/browser/authorize.py:53
+#: src/zojax/principal/registration/browser/authorize.py:76
+msgid "Authorization completed."
+msgstr ""
+
+#: src/zojax/principal/registration/browser/authorize.py:56
+#: src/zojax/principal/registration/browser/authorize.py:79
+msgid "Authorization code is invalid."
+msgstr ""
+
+#: src/zojax/principal/registration/browser/authorize.py:66
+#: src/zojax/principal/registration/browser/authorizations.pt:25
+msgid "Authorize"
+msgstr ""
+
+#: src/zojax/principal/registration/browser/authorize.py:86
+#: src/zojax/principal/registration/browser/login.py:30
+msgid "Login"
+msgstr ""
+
+#: src/zojax/principal/registration/browser/authorize.py:87
+msgid "Enter your login."
+msgstr ""
+
+#: src/zojax/principal/registration/browser/authorize.py:96
+msgid "Re-send authorization"
+msgstr ""
+
+#: src/zojax/principal/registration/browser/authorize.py:98
+msgid "Send"
+msgstr ""
+
+#: src/zojax/principal/registration/browser/confirm.pt:1
+msgid "Registration completed"
+msgstr ""
+
+#: src/zojax/principal/registration/browser/confirm.pt:3
+msgid "Congratulations, your registeration is complete. We need to confirm your email address. Please check your inbox for a verification email and click on the link in it."
+msgstr ""
+
+#: src/zojax/principal/registration/browser/invitation.py:40
+#: src/zojax/principal/registration/browser/invitation.py:47
+msgid "Invitation code"
+msgstr ""
+
+#: src/zojax/principal/registration/browser/invitation.py:94
+msgid "Invitation code is wrong."
+msgstr ""
+
+#: src/zojax/principal/registration/browser/invitation.py:98
+msgid "Invitation code expired."
+msgstr ""
+
+#: src/zojax/principal/registration/browser/join.py:33
+#: src/zojax/principal/registration/configure.zcml:8
+#: src/zojax/principal/registration/browser/select.pt:2
+msgid "Portal registration"
+msgstr ""
+
+#: src/zojax/principal/registration/browser/joinmenuitem.pt:1
+msgid "Join portal"
+msgstr ""
+
+#: src/zojax/principal/registration/browser/login.pt:2
+msgid "or use one of external login services"
+msgstr ""
+
+#: src/zojax/principal/registration/browser/select.pt:6
+msgid "Please select membership type"
+msgstr ""
+
+#: src/zojax/principal/registration/browser/wizard.py:48
+msgid "Configlet"
+msgstr ""
+
+#: src/zojax/principal/registration/browser/wizard.py:49
+msgid "Modify configlet"
+msgstr ""
+
+#: src/zojax/principal/registration/browser/wizard.py:59
+msgid "Invitations"
+msgstr ""
+
+#: src/zojax/principal/registration/configure.zcml:26
+msgid "Membership invitation"
+msgstr ""
+
+#: src/zojax/principal/registration/configure.zcml:8
+msgid "Portal registration configuration."
+msgstr ""
+
+#: src/zojax/principal/registration/interfaces.py:47
+msgid "Login name already in use."
+msgstr ""
+
+#: src/zojax/principal/registration/interfaces.py:59
+msgid "Registration method"
+msgstr ""
+
+#: src/zojax/principal/registration/interfaces.py:60
+msgid "Select portal registration method."
+msgstr ""
+
+#: src/zojax/principal/registration/interfaces.py:66
+msgid "Public"
+msgstr ""
+
+#: src/zojax/principal/registration/interfaces.py:67
+msgid "Member registration is public."
+msgstr ""
+
+#: src/zojax/principal/registration/interfaces.py:72
+msgid "Invitation"
+msgstr ""
+
+#: src/zojax/principal/registration/interfaces.py:73
+msgid "Use invitation system for member registration."
+msgstr ""
+
+#: src/zojax/principal/registration/interfaces.py:79
+msgid "Enable email member authorization."
+msgstr ""
+
+#: src/zojax/principal/registration/registration.py:176
+msgid "Your account is not authorized."
+msgstr ""
+
