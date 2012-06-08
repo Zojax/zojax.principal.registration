@@ -53,6 +53,10 @@ class EmailAuthorization(object):
             return False
 
         request = self.request
+
+        IStatusMessage(request).add(
+        _('You have been successfully registered. '))
+
         template = getMultiAdapter(
             (self.principal, authcode, request), IMailAuthorizationTemplate)
         template.send((formataddr((self.principal.title, email.address)),))
