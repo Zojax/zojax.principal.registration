@@ -20,7 +20,7 @@ Authorization
   >>> setSite(root)
   >>> sm = root.getSiteManager()
 
-  >>> configlet = sm.getUtility(IAuthenticationConfiglet)
+  >>> configlet = component.getUtility(IAuthenticationConfiglet)
   >>> configlet.installUtility()
   >>> configlet.installPrincipalRegistry()
 
