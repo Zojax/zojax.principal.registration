@@ -20,7 +20,7 @@ Authorization
   >>> setSite(root)
   >>> sm = root.getSiteManager()
 
-  >>> configlet = component.getUtility(IAuthenticationConfiglet)
+  >>> configlet = sm.getUtility(IAuthenticationConfiglet)
   >>> configlet.installUtility()
   >>> configlet.installPrincipalRegistry()
 
@@ -53,9 +53,9 @@ we need mail address
   >>> class simpleMailAddress(object):
   ...     interface.implements(IMailAddress)
   ...     component.adapts(Principal)
-  ...     
+  ...
   ...     address = 'nkim@zojax.net'
-  ...     
+  ...
   ...     def __init__(self, principal):
   ...         pass
 
@@ -227,7 +227,7 @@ Authorization configlet
 
 
 user1
-  
+
   >>> actor.open("http://localhost/test.html")
   >>> actor.getLink('Join portal').click()
 
@@ -274,7 +274,7 @@ user1
 
 
 user2
-  
+
   >>> actor.open("http://localhost/test.html")
   >>> actor.getLink('Join portal').click()
   >>> actor.getControl('User Id').value = u'user2'
@@ -291,7 +291,7 @@ user2
 
   >>> actor.getControl('Authorization code').value = 'sdfasf asdf asdf'
   >>> actor.getControl('Authorize').click()
-  
+
   >>> 'Authorization code is invalid.' in actor.contents
   True
 
@@ -318,7 +318,7 @@ user2
   >>> actor.open("http://localhost/logout.html")
 
 user3
-  
+
   >>> actor.open("http://localhost/test.html")
   >>> actor.getLink('Join portal').click()
   >>> actor.getControl('User Id').value = u'user3'
@@ -336,10 +336,10 @@ user3
   >>> from zojax.authentication.interfaces import IPrincipalByLogin
   >>> class PrincipalByLogin(object):
   ...     interface.implements(IPrincipalByLogin)
-  ...     
+  ...
   ...     def getPrincipalByLogin(self, login):
   ...         auth = sm.getUtility(IAuthentication)
-  ...         
+  ...
   ...         plugin = auth.get('users')
   ...         if plugin is not None:
   ...             try:

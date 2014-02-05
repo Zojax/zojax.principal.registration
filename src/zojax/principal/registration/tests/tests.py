@@ -25,9 +25,32 @@ from zojax.layoutform.interfaces import ILayoutFormLayer
 from zojax.authentication.tests.install import installAuthentication
 
 
+
+import os
+import unittest, doctest
+from zope import interface, component, event
+from zope.component import getUtility
+from zope.app.testing import setup
+from zope.app.testing.functional import ZCMLLayer
+from zope.app.rotterdam import Rotterdam
+from zope.session import session
+from zope.app.component.hooks import getSite, setSite
+from zope.app.testing import functional
+from zope.app.security.interfaces import IAuthentication
+from zope.app.intid import IntIds
+from zope.app.intid.interfaces import IIntIds
+from zope.lifecycleevent import ObjectCreatedEvent
+
+from zojax.layoutform.interfaces import ILayoutFormLayer
+
+from zojax.authentication import principalinfo
+from zojax.authentication.authentication import PluggableAuthentication
+from zojax.authentication.interfaces import ICredentialsPluginFactory
+from zojax.authentication.credentials import factory as defaultCreds
+
+
 class IDefaultSkin(ILayoutFormLayer, Rotterdam):
     """ skin """
-
 
 zojaxRegistration = ZCMLLayer(
     os.path.join(os.path.split(__file__)[0], 'ftesting.zcml'),
@@ -46,7 +69,43 @@ def tearDown(test):
     setup.tearDownTestAsModule(test)
 
 
+def FunctionalDocFileSuite(*paths, **kw):
+    layer = zojaxRegistration
+
+    globs = kw.setdefault('globs', {})
+    globs['http'] = functional.HTTPCaller()
+    globs['getRootFolder'] = functional.getRootFolder
+    globs['sync'] = functional.sync
+
+    kw['package'] = doctest._normalize_module(kw.get('package'))
+
+    kwsetUp = kw.get('setUp')
+    def setUp(test):
+        functional.FunctionalTestSetup().setUp()
+
+    kw['setUp'] = setUp
+
+    kwtearDown = kw.get('tearDown')
+    def tearDown(test):
+        setSite(None)
+        functional.FunctionalTestSetup().tearDown()
+
+    kw['tearDown'] = tearDown
+
+    if 'optionflags' not in kw:
+        old = doctest.set_unittest_reportflags(0)
+        doctest.set_unittest_reportflags(old)
+        kw['optionflags'] = (old|doctest.ELLIPSIS|doctest.NORMALIZE_WHITESPACE)
+
+    suite = doctest.DocFileSuite(*paths, **kw)
+    suite.layer = layer
+    return suite
+
+
 def test_suite():
+
+    authorization = FunctionalDocFileSuite("authorization.txt")
+
     fields = doctest.DocFileSuite(
         '../fields.txt',
         setUp=setUp, tearDown=tearDown,
@@ -70,11 +129,6 @@ def test_suite():
         "invitation.txt",
         optionflags=doctest.ELLIPSIS|doctest.NORMALIZE_WHITESPACE)
     invitation.layer = zojaxRegistration
-
-    authorization = doctest.DocFileSuite(
-        "authorization.txt",
-        optionflags=doctest.ELLIPSIS|doctest.NORMALIZE_WHITESPACE)
-    authorization.layer = zojaxRegistration
 
     return unittest.TestSuite((fields, tool, voc,
                                reg, invitation, authorization))
